@@ -2,16 +2,22 @@ const express = require("express");
 const app = express();
 const port = 3000;
 
+require("dotenv").config();
+
 const session = require("express-session");
 const passport = require("passport");
-const LocalStrategy = require("passport-local");
+const LocalStrategy = require("passport-local").Strategy;
+const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const flash = require("connect-flash");
 
 const {
   serialize,
   deserialize,
 } = require("./Helpers/passport/serializeDeSerialize");
-const passportAuthConfig = require("./Helpers/passport/passportConfig");
+const {
+  passportLocalAuthConfig,
+  passportGoogleAuthConfig,
+} = require("./Helpers/passport/passportConfig");
 
 const loginController = require("./controllers/loginController");
 const logoutController = require("./controllers/logoutController");
@@ -26,7 +32,7 @@ app.use(flash());
 
 app.use(
   session({
-    secret: "my-super-secret",
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
   })
@@ -35,7 +41,20 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
-passport.use(new LocalStrategy({ usernameField: "email" }, passportAuthConfig));
+passport.use(
+  new LocalStrategy({ usernameField: "email" }, passportLocalAuthConfig)
+);
+
+passport.use(
+  new GoogleStrategy(
+    {
+      clientID: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      callbackURL: "http://localhost:3000/auth/google/callback",
+    },
+    passportGoogleAuthConfig
+  )
+);
 
 passport.serializeUser(serialize);
 
@@ -62,8 +81,22 @@ app.post(
   })
 );
 
+app.get(
+  "/auth/google",
+  passport.authenticate("google", { scope: ["profile", "email"] })
+);
+
+app.get(
+  "/auth/google/callback",
+  passport.authenticate("google", {
+    failureRedirect: "/login",
+    successRedirect: "/dashboard",
+    failureFlash: true,
+  })
+);
+
 app.get("/dashboard", checkIsAuthenticated, (req, res) => {
-  res.render("dashboard", { userName: req.user.userName });
+  res.render("dashboard", { user: req.user });
 });
 
 app.get("/logout", logoutController);

@@ -28,6 +28,8 @@ const registerController = async (req, res) => {
       userName: req.body.userName,
       email: req.body.email,
       password: hashedPassword,
+      profilePicture:
+        "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png",
     });
 
     res.status(201);

@@ -6,7 +6,12 @@
     <title>Dashboard</title>
   </head>
   <body>
-    <h1>Welcome to the Dashboard, <%= userName %>!</h1>
+    <h1>Welcome to the Dashboard, <%= user.userName %>!</h1>
+    <img
+      src="<%= user.profilePicture %>"
+      referrerpolicy="no-referrer"
+      alt="Profile Picture"
+    />
     <p><a href="/logout">Logout</a></p>
   </body>
 </html>

@@ -11,7 +11,10 @@ const deserialize = (authenticatedUserId, done) => {
     id: findUser.id,
     userName: findUser.userName,
     email: findUser.email,
+    profilePicture: findUser.profilePicture,
+    googleId: findUser.googleId,
   };
+
   done(null, authenticatedUser);
 };
 
